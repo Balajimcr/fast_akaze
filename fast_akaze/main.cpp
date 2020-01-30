@@ -22,7 +22,7 @@
 
 
 // The number of threads to use; 0 to disable multi-threading
-#define OPENCV_THREAD_COUNT              0
+#define OPENCV_THREAD_COUNT              4
 
 // Allow akaze2 thread to run at the pace exceeding the video frame rate
 #define	ALLOW_OVERPACE                  true
@@ -54,7 +54,7 @@
 #define AKAZE_NUM_OCTAVE_SUBLAYERS       4
 
 #define AKAZE_KPCOUNT_MIN                140
-#define AKAZE_KPCOUNT_MAX                160
+#define AKAZE_KPCOUNT_MAX                350
 #define AKAZE_THRESHOLD_MIN              0.00001f
 #define AKAZE_THRESHOLD_MAX              0.1f
 
@@ -109,7 +109,7 @@ void tune_akaze_threshold(cv::AKAZE & akaze_, int last_nkp)
         threshold = AKAZE_THRESHOLD_MIN, s = "o"; // The aperture is fully open
 
     //std::cout << s << " " << last_nkp << "\tdelta:" << (target_y - y) << ": " << threshold << std::endl;
-    std::cout << s;
+    //std::cout << s;
 
     akaze_.setThreshold(threshold);
 }
@@ -315,7 +315,7 @@ void run_akaze2(barter<cv::Mat> & frame_barter_, std::atomic_int & t_state_, std
 #else
     fps_stats fps{ "AKAZE" };
 #endif
-    bool side_by_side = false, tracking = false;
+    bool side_by_side = false, tracking = true;
     for (;; fps.tick()) {
 
         // Wait for a new frame to arrive
@@ -333,6 +333,7 @@ void run_akaze2(barter<cv::Mat> & frame_barter_, std::atomic_int & t_state_, std
 
         // Keypoint detection
         tune_akaze_threshold(*detector, last_nkp);
+		
         detector->detectAndCompute(*frame, cv::noArray(), kp, desc);
         last_nkp = (int)kp.size();
 
